@@ -1,6 +1,7 @@
 #!/usr/bin/python
+# DMP Upload handler
 # Python 2.7.x
-# Dependent on the watchdog library, see docs for installation
+# Dependent on the watchdog library, see https://pypi.python.org/pypi/watchdog
 
 import time, sys, uuid, os
 import SimpleHTTPServer, SocketServer
@@ -22,7 +23,7 @@ class uploadHandler(PatternMatchingEventHandler):
 
     def on_modified(self, event): #shoot if monitored files are modified
         print "File modified"
-        while os.access(event.src_path, os.W_OK): #while the file still exist in www dir...
+        while os.access(event.src_path, os.W_OK): #while the file still exist in upload dir...
             self.rename(event) #try to process it
         pass
 
@@ -39,23 +40,6 @@ class uploadHandler(PatternMatchingEventHandler):
         nfn = '{0}.{1}'.format(ts_tmpr, ext) #assemble the full file name
         return nfn
         pass   
-"""
-class photoProcessor(PatternMatchingEventHandler):
-        patterns = ["*.jpeg", "*.jpg", "*.png", "*.bmp"]
-
-        def on_created(self, event):
-            #mv ${filetmp}.mp4 "${playerdir}/${datetime}".mp4
-            #print(event.src_path+" moved")
-            pass
-
-class videoProcessor(PatternMatchingEventHandler):
-        patterns = ["*.3gp", "*.mp4", "*.webm","*.m4v", "*.flv", "*.f4v","*.ogv", "*.ogx", "*.3g2"]
-
-        def on_created(self, event):
-            #mv ${filetmp}.mp4 "${playerdir}/${datetime}".mp4
-            #print(event.src_path+" moved")
-            pass
-"""
 
  #For quick http tests only
 def http_start(port, wdir):
@@ -70,14 +54,12 @@ if __name__ == '__main__':
 
     uploadDir = "upload" # For Linux, change to "upload/"
     tempDir = "temp\\" 
-    #wwwDir = "www\\"
+    wwwDir = "www\\"
 
     uploadObserver = Observer()
     tempObserver = Observer()
     
     uploadObserver.schedule(uploadHandler(), uploadDir)
-    #tempObserver.schedule(photoProcessor(), tempDir)
-    #tempObserver.schedule(videoProcessor(), tempDir)
     
     uploadObserver.start()
     tempObserver.start()
@@ -85,7 +67,7 @@ if __name__ == '__main__':
     print os.getcwd()
     print "It's on"
 
-    #http_start(9998, wwwDir) #See function def
+    #http_start(9998, wwwDir)
 
     try:
         while True:
